@@ -1,5 +1,12 @@
 /*eslint-env browser*/
 
+/*
+  Organising employee data where each row is an employee data.
+  Index 0 - Employee id
+  Index 1 - Name
+  Index 2 - Title
+  Index 3 - Extension
+ */
 var employeeData = [
   [
      "0",
@@ -34,28 +41,32 @@ var employeeData = [
 ]
 
 
+// Reads the employee data and updates he employee table UI
 function loadEmployeeData() {
   var table = document.getElementById('employee_table');
   var header = table.firstElementChild.firstElementChild;
-  var rows = employeeData.map(function(emp) {
-    var id = emp[0] || '';
-    var name = emp[1] || '';
-    var title = emp[2] || '';
-    var extension = emp[3] || '';
-    return `<tr id = ${id}> <td> ${name} </td> <td> ${title} </td> <td> ${extension} </td> <td> <input type=\"button\" value=\"Delete\"> </td> </tr>`;
-  });
-  table.innerHTML = header.innerHTML + rows.join('');
-  attachDeleteEvents();
-  document.getElementById('count').innerText = rows.length;
+  var rows = [header.innerHTML].concat(employeeData.map(function(emp) {
+    return emp.reduce(function(row, col, index){
+      if(!index)
+        row.push(`<tr id = ${col}>`);
+      else
+        row.push(`<td> ${col || ''} </td>`);
+      return row;
+    },[]).concat([`<td> <input type=\"button\" value=\"Delete\"> </td> </tr>`]);
+  }).map(function(r) { return r.join(''); }));
+  table.innerHTML = rows.join('');
+  attachDeleteEvents(); // Attach delete events to all the delete butons in the employee table
+  document.getElementById('count').innerText = rows.length - 1; // Remove header from count
 }
 
+// Deletes the an employee and updates the UI
 function deleteEmployee(event) {
   var employee_id = event.target.parentNode.parentNode.getAttribute("id") || '';
   if(!employee_id.length)
     return;
   var emp_index = -1;
   employeeData.forEach(function(emp, index) {
-    if(emp[0] === employee_id) {
+    if(emp[0] === employee_id) {  // Find the employee and remove it from the list
       emp_index = index;
     }
   });
@@ -67,6 +78,7 @@ function deleteEmployee(event) {
   loadEmployeeData();
 }
 
+//Attach delete events
 function attachDeleteEvents() {
   var deleteButtons = document.querySelectorAll('#employee_table tbody tr td input[type=button]') || [];
   deleteButtons.forEach(function (ele) {
@@ -78,6 +90,7 @@ function $(id) {
   return document.getElementById(id);
 }
 
+// Validates the user input and returns if valid and errorMsg in case of invalid data
 function isVaild(ele) {
   var id = ele.id || '';
   var val = ele.value || '';
@@ -85,13 +98,14 @@ function isVaild(ele) {
     'isValid': true,
     'errorMsg': ''
   }
+  // Name and title validator
   if(id === 'name' || id === 'title') {
     if(!val.length) {
       sts['isValid'] = false;
       sts['errorMsg'] = `Empty ${id}!!`
     }
   }
-  else if(id === 'extension') {
+  else if(id === 'extension') { // Extension validator
     var ext = Number(val);
     if(isNaN(ext) || ext < 0) {
       sts['isValid'] = false;
@@ -101,6 +115,7 @@ function isVaild(ele) {
   return sts;
 }
 
+// Adds an employee info to the table and updates UI
 function addEmployee() {
   var inputFields = [$('name'), $('title'), $('extension')];
   var isValidData = true;
@@ -109,14 +124,12 @@ function addEmployee() {
     if(id.length) {
       var sts = isVaild(ele);
       isValidData = isValidData && sts['isValid'];
-      span = document.getElementById("myspan");
-      //var error_txt = document.createTextNode(sts['errorMsg']);
-      ele.nextElementSibling.innerText = sts['errorMsg']; //appendChild(error_txt);
+      ele.nextElementSibling.innerText = sts['errorMsg'];
     }
   });
   if(!isValidData)
     return;
-  var emp_id = String(Math.round(Math.random() * Math.pow(10,10)));
+  var emp_id = String(Math.round(Math.random() * Math.pow(10,10))); // Generate an unique id for each employee
   var newEmployee = [];
   newEmployee.push(emp_id);
   inputFields.forEach(function(ele){
