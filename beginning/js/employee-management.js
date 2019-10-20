@@ -1,41 +1,47 @@
 /*eslint-env browser*/
 
-var employeeData = {
-  1: {
-    "name": "ABC",
-    "title": "abc",
-    "extension": '123'
-  },
-  2: {
-    "name": "DEF",
-    "title": "def",
-    "extension": '456'
-  },
-  3: {
-    "name": "GHI",
-    "title": "ghi",
-    "extension": '789'
-  },
-  4: {
-    "name": "JKL",
-    "title": "jkl",
-    "extension": '145'    
-  },
-  5: {
-    "name": "MNO",
-    "title": "mno",
-    "extension": '284'
-  }
-}
+var employeeData = [
+  [
+     "0",
+     "ABC",
+     "abc",
+     '123'
+  ],
+  [
+     "1",
+     "DEF",
+     "def",
+     '456'
+  ],
+  [
+     "2",
+     "GHI",
+     "ghi",
+     '789'
+  ],
+  [
+     "3",
+     "JKL",
+     "jkl",
+     '145'    
+  ],
+  [
+     "4",
+     "MNO",
+     "mno",
+     '284'
+  ]
+]
 
 
 function loadEmployeeData() {
   var table = document.getElementById('employee_table');
   var header = table.firstElementChild.firstElementChild;
-  var rows = Object.keys(employeeData).map(function(id) {
-    var name = employeeData[id].name || '';
-    var title = employeeData[id].title || '';
-    var extension = employeeData[id].extension || '';
+  var rows = employeeData.map(function(emp) {
+    var id = emp[0] || '';
+    var name = emp[1] || '';
+    var title = emp[2] || '';
+    var extension = emp[3] || '';
     return `<tr id = ${id}> <td> ${name} </td> <td> ${title} </td> <td> ${extension} </td> <td> <input type=\"button\" value=\"Delete\"> </td> </tr>`;
   });
   table.innerHTML = header.innerHTML + rows.join('');
@@ -47,7 +53,17 @@ function deleteEmployee(event) {
   var employee_id = event.target.parentNode.parentNode.getAttribute("id") || '';
   if(!employee_id.length)
     return;
-  delete employeeData[employee_id];
+  var emp_index = -1;
+  employeeData.forEach(function(emp, index) {
+    if(emp[0] === employee_id) {
+      emp_index = index;
+    }
+  });
+  if(emp_index == -1) {
+    window.alert("Employee id not found in the list");
+    return;
+  }
+  employeeData.splice(emp_index,1);
   loadEmployeeData();
 }
 
@@ -100,13 +116,14 @@ function addEmployee() {
   });
   if(!isValidData)
     return;
-  var emp_id = Math.round(Math.random() * Math.pow(10,10));
-  var newEmployee = {};
+  var emp_id = String(Math.round(Math.random() * Math.pow(10,10)));
+  var newEmployee = [];
+  newEmployee.push(emp_id);
   inputFields.forEach(function(ele){
-    newEmployee[ele.id] = ele.value;
+    newEmployee.push(ele.value);
     ele.value = '';
   });
-  employeeData[emp_id] = newEmployee;
+  employeeData.push(newEmployee);
   loadEmployeeData();
 }
 
